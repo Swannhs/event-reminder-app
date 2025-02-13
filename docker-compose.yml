@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./api-service
+      dockerfile: Dockerfile
+    container_name: laravel_app
+    network_mode: host
+    volumes:
+      - ./api-service:/app
+    environment:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_DATABASE: event_db
+      DB_USERNAME: root
+      DB_PASSWORD: root
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./ui-service
+      dockerfile: Dockerfile
+    container_name: nextjs_app
+    network_mode: host
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000/api
+    volumes:
+      - ./ui-service:/app
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    network_mode: host
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: event_db
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
