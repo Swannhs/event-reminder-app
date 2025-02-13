@@ -9,7 +9,7 @@ class EventReminderRequestData
     public function __construct(
         public readonly string $title,
         public readonly ?string $description,
-        public readonly Carbon $date_time,
+        public readonly ?Carbon $date_time,
         public readonly string $status,
         public readonly ?string $reminder_email
     ) {}
@@ -19,7 +19,7 @@ class EventReminderRequestData
         return new self(
             title: $data['title'],
             description: $data['description'] ?? null,
-            date_time: Carbon::parse($data['date_time']),
+            date_time: isset($data['date_time']) ? Carbon::parse($data['date_time']) : null,
             status: $data['status'] ?? 'upcoming',
             reminder_email: $data['reminder_email'] ?? null
         );

@@ -7,6 +7,7 @@ use App\Http\Requests\StoreEventReminderRequest;
 use App\Http\Requests\UpdateEventReminderRequest;
 use App\Http\Resources\EventReminderResource;
 use App\Services\EventReminderService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use OpenApi\Annotations as OA;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
@@ -35,13 +36,48 @@ class EventReminderController extends Controller
      *      path="/api/event-reminders",
      *      operationId="getEventReminders",
      *      tags={"Event Reminders"},
-     *      summary="Get all event reminders",
-     *      @OA\Response(response=200, description="Successful retrieval of event reminders")
+     *      summary="Get all event reminders with pagination",
+     *      @OA\Parameter(
+     *          name="page",
+     *          in="query",
+     *          required=false,
+     *          description="Page number for pagination",
+     *          @OA\Schema(type="integer", example=1)
+     *      ),
+     *      @OA\Parameter(
+     *          name="per_page",
+     *          in="query",
+     *          required=false,
+     *          description="Number of items per page (default: 10)",
+     *          @OA\Schema(type="integer", example=10)
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful retrieval of paginated event reminders",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              @OA\Property(property="data", type="array", @OA\Items(ref="#/components/schemas/EventReminder")),
+     *              @OA\Property(property="links", type="object",
+     *                  @OA\Property(property="first", type="string", example="http://localhost/api/event-reminders?page=1"),
+     *                  @OA\Property(property="last", type="string", example="http://localhost/api/event-reminders?page=5"),
+     *                  @OA\Property(property="prev", type="string", nullable=true, example="http://localhost/api/event-reminders?page=1"),
+     *                  @OA\Property(property="next", type="string", nullable=true, example="http://localhost/api/event-reminders?page=3")
+     *              ),
+     *              @OA\Property(property="meta", type="object",
+     *                  @OA\Property(property="current_page", type="integer", example=2),
+     *                  @OA\Property(property="from", type="integer", example=11),
+     *                  @OA\Property(property="last_page", type="integer", example=5),
+     *                  @OA\Property(property="per_page", type="integer", example=10),
+     *                  @OA\Property(property="to", type="integer", example=20),
+     *                  @OA\Property(property="total", type="integer", example=50)
+     *              )
+     *          )
+     *      )
      * )
      */
     public function index(): JsonResponse
     {
-        return response()->json(EventReminderResource::collection($this->eventReminderService->getAllEvents()), ResponseAlias::HTTP_OK);
+        return EventReminderResource::collection($this->eventReminderService->getAllEvents())->response();
     }
 
     /**
@@ -50,13 +86,29 @@ class EventReminderController extends Controller
      *      operationId="createEventReminder",
      *      tags={"Event Reminders"},
      *      summary="Create a new event reminder",
-     *      @OA\Response(response=201, description="Event created successfully")
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(ref="#/components/schemas/EventReminderRequest")
+     *      ),
+     *      @OA\Response(
+     *          response=201,
+     *          description="Event created successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="success", type="boolean", example=true),
+     *              @OA\Property(property="message", type="string", example="Event reminder created successfully"),
+     *              @OA\Property(property="data", ref="#/components/schemas/EventReminder")
+     *          )
+     *      )
      * )
      */
     public function store(StoreEventReminderRequest $request): JsonResponse
     {
         $event = $this->eventReminderService->createEvent($request->toDto());
-        return response()->json(new EventReminderResource($event), ResponseAlias::HTTP_CREATED);
+        return response()->json([
+            'success' => true,
+            'message' => 'Event reminder created successfully',
+            'data' => new EventReminderResource($event),
+        ], ResponseAlias::HTTP_CREATED);
     }
 
     /**
@@ -66,12 +118,34 @@ class EventReminderController extends Controller
      *      tags={"Event Reminders"},
      *      summary="Get an event reminder by ID",
      *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="Successful retrieval of event reminder")
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful retrieval of event reminder",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="success", type="boolean", example=true),
+     *              @OA\Property(property="message", type="string", example="Event reminder retrieved successfully"),
+     *              @OA\Property(property="data", ref="#/components/schemas/EventReminder")
+     *          )
+     *      ),
+     *      @OA\Response(response=404, description="Event not found")
      * )
      */
     public function show(int $id): JsonResponse
     {
-        return response()->json(new EventReminderResource($this->eventReminderService->getEventById($id)), ResponseAlias::HTTP_OK);
+        $event = $this->eventReminderService->getEventById($id);
+
+        if (!$event) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Event reminder not found'
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Event reminder retrieved successfully',
+            'data' => new EventReminderResource($event),
+        ], ResponseAlias::HTTP_OK);
     }
 
     /**
@@ -81,13 +155,39 @@ class EventReminderController extends Controller
      *      tags={"Event Reminders"},
      *      summary="Update an existing event reminder",
      *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
-     *      @OA\Response(response=200, description="Event updated successfully")
+     *      @OA\RequestBody(
+     *          required=true,
+     *          @OA\JsonContent(ref="#/components/schemas/EventReminderUpdateRequest")
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Event updated successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="success", type="boolean", example=true),
+     *              @OA\Property(property="message", type="string", example="Event reminder updated successfully"),
+     *              @OA\Property(property="data", ref="#/components/schemas/EventReminder")
+     *          )
+     *      ),
+     *      @OA\Response(response=404, description="Event not found")
      * )
      */
     public function update(UpdateEventReminderRequest $request, int $id): JsonResponse
     {
-        $event = $this->eventReminderService->updateEvent($id, $request->toDto());
-        return response()->json(new EventReminderResource($event), ResponseAlias::HTTP_OK);
+        try {
+            $event = $this->eventReminderService->updateEvent($id, $request->toDto());
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Event reminder updated successfully',
+                'data' => new EventReminderResource($event),
+            ], ResponseAlias::HTTP_OK);
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Event reminder not found'
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
     }
 
     /**
@@ -96,11 +196,32 @@ class EventReminderController extends Controller
      *      operationId="deleteEventReminder",
      *      tags={"Event Reminders"},
      *      summary="Delete an event reminder",
-     *      @OA\Response(response=200, description="Event deleted successfully")
+     *      @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer")),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Event deleted successfully",
+     *          @OA\JsonContent(
+     *              @OA\Property(property="success", type="boolean", example=true),
+     *              @OA\Property(property="message", type="string", example="Event reminder deleted successfully")
+     *          )
+     *      ),
+     *      @OA\Response(response=404, description="Event not found")
      * )
      */
     public function destroy(int $id): JsonResponse
     {
-        return response()->json(['message' => $this->eventReminderService->deleteEvent($id) ? 'Deleted' : 'Not Found'], ResponseAlias::HTTP_OK);
+        $deleted = $this->eventReminderService->deleteEvent($id);
+
+        if (!$deleted) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Event reminder not found'
+            ], ResponseAlias::HTTP_NOT_FOUND);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Event reminder deleted successfully',
+        ], ResponseAlias::HTTP_OK);
     }
 }

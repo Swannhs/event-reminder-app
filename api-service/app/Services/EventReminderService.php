@@ -5,13 +5,13 @@ namespace App\Services;
 use App\Data\EventReminderRequestData;
 use App\Data\EventReminderResponseData;
 use App\Models\EventReminder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class EventReminderService
 {
-    public function getAllEvents(): Collection
+    public function getAllEvents(int $perPage = 10): LengthAwarePaginator
     {
-        return EventReminder::all()->map(fn($event) => EventReminderResponseData::fromModel($event));
+        return EventReminder::paginate($perPage);
     }
 
     public function createEvent(EventReminderRequestData $data): EventReminderResponseData
@@ -33,18 +33,19 @@ class EventReminderService
         return EventReminderResponseData::fromModel(EventReminder::findOrFail($id));
     }
 
-    public function updateEvent(int $id, EventReminderRequestData $data): EventReminderResponseData
+    public function updateEvent(int $id, EventReminderRequestData $data): EventReminder
     {
         $event = EventReminder::findOrFail($id);
+
         $event->update([
             'title' => $data->title,
-            'description' => $data->description,
-            'date_time' => $data->date_time,
+            'description' => $data->description ?? $event->description,
+            'date_time' => $data->date_time ?? $event->date_time,
             'status' => $data->status,
-            'reminder_email' => $data->reminder_email
+            'reminder_email' => $data->reminder_email ?? $event->reminder_email,
         ]);
 
-        return EventReminderResponseData::fromModel($event);
+        return $event;
     }
 
     public function deleteEvent(int $id): bool
