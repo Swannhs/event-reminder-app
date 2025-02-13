@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     git \
     curl \
+    cron \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql
 
@@ -19,6 +20,8 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
+RUN echo "* * * * * cd /app && php artisan schedule:run >> /dev/null 2>&1" | crontab -
+
 EXPOSE 8000
 
-CMD ["php artisan serve"]
+CMD cron && php artisan serve --host=0.0.0.0 --port=8000
