@@ -25,7 +25,7 @@ services:
     container_name: nextjs_app
     network_mode: host
     environment:
-      - NEXT_PUBLIC_API_URL=http://backend:8000/api
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
     volumes:
       - ./ui-service:/app
 
