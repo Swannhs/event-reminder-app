@@ -10,17 +10,26 @@ use Illuminate\Support\Facades\Log;
 
 class CsvEventReminderService
 {
-    public function importCsv(string $filePath): array
+    public function importCsvFromStream(Reader $csv): array
     {
         try {
-            $csv = Reader::createFromPath($filePath, 'r');
-            $csv->setHeaderOffset(0);
-            $records = $csv->getRecords();
+            Log::info("Processing CSV file directly from stream.");
 
+            $expectedHeaders = ['title', 'description', 'date_time', 'status', 'reminder_email'];
+            $csvHeaders = $csv->getHeader();
+
+            if ($csvHeaders !== $expectedHeaders) {
+                Log::error("CSV Headers Mismatch", ['expected' => $expectedHeaders, 'found' => $csvHeaders]);
+                return ['error' => 'CSV headers do not match the expected format'];
+            }
+
+            $records = $csv->getRecords();
             $importedData = [];
             $errors = [];
 
             foreach ($records as $index => $row) {
+                Log::info("Processing Row {$index}", $row);
+
                 $validator = Validator::make($row, [
                     'title' => 'required|string|max:255',
                     'description' => 'nullable|string',
@@ -31,10 +40,12 @@ class CsvEventReminderService
 
                 if ($validator->fails()) {
                     $errors[$index + 1] = $validator->errors()->all();
+                    Log::warning("Validation Failed for Row {$index}", $errors[$index]);
                     continue;
                 }
 
                 $event = EventReminder::create([
+                    'event_id' => 'EVENT-' . strtoupper(uniqid()),
                     'title' => $row['title'],
                     'description' => $row['description'] ?? null,
                     'date_time' => $row['date_time'],

@@ -7,6 +7,9 @@ use App\Http\Requests\ImportEventReminderRequest;
 use App\Services\CsvEventReminderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use League\Csv\Reader;
 use OpenApi\Annotations as OA;
 
 /**
@@ -60,23 +63,61 @@ class CsvEventReminderController extends Controller
      */
     public function importCsv(ImportEventReminderRequest $request): JsonResponse
     {
-        $file = $request->file('csv_file');
-        $filePath = $file->storeAs('uploads', 'event_reminders.csv');
-
-        $result = $this->csvService->importCsv(storage_path("app/{$filePath}"));
-
-        if (isset($result['error'])) {
+        if (!$request->hasFile('csv_file')) {
+            Log::error("No CSV file uploaded.");
             return response()->json([
                 'success' => false,
-                'message' => $result['error'],
+                'message' => 'No CSV file uploaded'
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'CSV imported successfully',
-            'imported_count' => count($result['imported']),
-            'errors' => $result['errors']
-        ], Response::HTTP_OK);
+        $file = $request->file('csv_file');
+
+        if (!$file->isValid()) {
+            Log::error("Invalid CSV file upload.");
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid file upload'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $stream = fopen($file->getRealPath(), 'r');
+
+            if (!$stream) {
+                Log::error("Failed to open CSV file stream.");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error opening CSV file'
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            $csv = Reader::createFromStream($stream);
+            $csv->setHeaderOffset(0);
+
+            $result = $this->csvService->importCsvFromStream($csv);
+
+            fclose($stream);
+
+            if (isset($result['error'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $result['error'],
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'CSV imported successfully',
+                'imported_count' => count($result['imported']),
+                'errors' => $result['errors']
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('CSV Import Error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing CSV file',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }

@@ -20,8 +20,13 @@ COPY . .
 
 RUN composer install --no-dev --optimize-autoloader
 
-RUN echo "* * * * * cd /app && php artisan schedule:run >> /dev/null 2>&1" | crontab -
+RUN chmod -R 777 storage bootstrap/cache
+
+# Add cron job for Laravel Scheduler
+RUN echo "* * * * * cd /app && php artisan schedule:run >> /var/log/laravel-cron.log 2>&1" | crontab -
+
+# Start cron in the background & process Laravel queues
+CMD service cron start && php artisan queue:work &
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 
 EXPOSE 8000
-
-CMD cron && php artisan serve --host=0.0.0.0 --port=8000

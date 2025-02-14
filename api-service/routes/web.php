@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\CsvEventReminderController;
 use App\Http\Controllers\Api\EventReminderController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 //Route::get('/', function () {

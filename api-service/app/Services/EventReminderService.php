@@ -55,6 +55,6 @@ class EventReminderService
 
     private function generateEventId(): string
     {
-        return 'EVT-' . strtoupper(uniqid());
+        return 'EVENT-' . strtoupper(uniqid());
     }
 }
