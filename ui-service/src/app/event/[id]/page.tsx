@@ -3,8 +3,8 @@
 import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {useParams} from "next/navigation";
-import {fetchEventById} from "@/app/store/slice/eventSlice";
-import {RootState, AppDispatch} from "@/app/store/store";
+import {fetchEventById} from "@/store/slice/eventSlice";
+import {RootState, AppDispatch} from "@/store/store";
 import Link from "next/link";
 
 export default function EventViewPage() {

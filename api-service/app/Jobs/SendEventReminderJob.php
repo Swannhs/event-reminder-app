@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class SendEventReminderJob implements ShouldQueue
@@ -24,7 +25,7 @@ class SendEventReminderJob implements ShouldQueue
 
     public function handle()
     {
-        \Laravel\Prompts\info("Sending reminder email for event: {$this->event->title}");
+        Log::info("Sending reminder email for event: {$this->event->title}");
         if ($this->event->reminder_email) {
             Mail::to($this->event->reminder_email)->send(new EventReminderMail($this->event));
         }

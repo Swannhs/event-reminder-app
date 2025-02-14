@@ -17,4 +17,13 @@ class EventReminder extends Model
         'status',
         'reminder_email'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($event) {
+            $event->event_id = 'EVENT-' . strtoupper(substr(uniqid(), -5));
+        });
+    }
 }

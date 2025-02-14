@@ -1,8 +1,8 @@
 import React from "react";
 import {useDispatch} from "react-redux";
-import {deleteEvent} from "../store/slice/eventSlice";
+import {deleteEvent} from "@/store/slice/eventSlice";
 import Link from "next/link";
-import {AppDispatch} from "@/app/store/store";
+import {AppDispatch} from "@/store/store";
 
 interface EventProps {
     event: {

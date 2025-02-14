@@ -17,7 +17,6 @@ class EventReminderService
     public function createEvent(EventReminderRequestData $data): EventReminderResponseData
     {
         $event = EventReminder::create([
-            'event_id' => $this->generateEventId(),
             'title' => $data->title,
             'description' => $data->description,
             'date_time' => $data->date_time,
@@ -51,10 +50,5 @@ class EventReminderService
     public function deleteEvent(int $id): bool
     {
         return EventReminder::findOrFail($id)->delete();
-    }
-
-    private function generateEventId(): string
-    {
-        return 'EVENT-' . strtoupper(uniqid());
     }
 }

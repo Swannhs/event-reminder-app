@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {CreateEventType} from "@/app/types/eventType";
+import {CreateEventType} from "@/api/types/eventType";
 
 interface EventFormProps {
     initialData?: CreateEventType;

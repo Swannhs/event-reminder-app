@@ -45,7 +45,6 @@ class CsvEventReminderService
                 }
 
                 $event = EventReminder::create([
-                    'event_id' => 'EVENT-' . strtoupper(uniqid()),
                     'title' => $row['title'],
                     'description' => $row['description'] ?? null,
                     'date_time' => $row['date_time'],
