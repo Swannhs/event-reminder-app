@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { apiClient } from "../../api/eventApi";
+import { apiClient } from "@/api/eventApi";
 
 export const importCsv = createAsyncThunk("csv/importCsv", async (formData: FormData) => {
     const response = await apiClient.post("/event-reminders/import", formData, {

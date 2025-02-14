@@ -2,10 +2,10 @@
 
 import {useRouter} from "next/navigation";
 import {useDispatch} from "react-redux";
-import {AppDispatch} from "@/app/store/store";
-import {addEvent} from "@/app/store/slice/eventSlice";
-import EventForm from "@/app/components/EventForm";
-import {CreateEventType} from "@/app/types/eventType";
+import {AppDispatch} from "@/store/store";
+import {addEvent} from "@/store/slice/eventSlice";
+import EventForm from "@/components/EventForm";
+import {CreateEventType} from "@/api/types/eventType";
 
 export default function CreateEventPage() {
     const dispatch = useDispatch<AppDispatch>();

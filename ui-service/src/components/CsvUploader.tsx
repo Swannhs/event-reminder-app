@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { importCsv, clearMessages } from "../store/slice/csvSlice";
-import { RootState, AppDispatch } from "../store/store";
+import { importCsv, clearMessages } from "@/store/slice/csvSlice";
+import { RootState, AppDispatch } from "@/store/store";
 import Link from "next/link";
 
 export default function CsvUploader() {

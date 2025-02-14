@@ -21,7 +21,7 @@ class EventReminderFactory extends Factory
             'description' => $this->faker->paragraph(),
             'date_time' => $this->faker->dateTimeBetween('now', '+1 year'),
             'status' => $this->faker->randomElement(['upcoming', 'completed']),
-            'reminder_email' => $this->faker->optional()->safeEmail(),
+            'reminder_email' => $this->faker->email,
             'created_at' => now(),
             'updated_at' => now(),
         ];

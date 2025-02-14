@@ -2,10 +2,10 @@
 
 import {useEffect} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchEvents, setPage} from "@/app/store/slice/eventSlice";
-import {RootState, AppDispatch} from "@/app/store/store";
-import EventCard from "@/app/components/EventCard";
-import CsvUploader from "@/app/components/CsvUploader";
+import {fetchEvents, setPage} from "@/store/slice/eventSlice";
+import {RootState, AppDispatch} from "@/store/store";
+import EventCard from "@/components/EventCard";
+import CsvUploader from "@/components/CsvUploader";
 
 export default function HomePage() {
     const dispatch = useDispatch<AppDispatch>();

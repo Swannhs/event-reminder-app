@@ -3,10 +3,10 @@
 import {useEffect, useState} from "react";
 import {useRouter, useParams} from "next/navigation";
 import {useDispatch, useSelector} from "react-redux";
-import {fetchEventById, editEvent} from "@/app/store/slice/eventSlice";
-import {RootState, AppDispatch} from "@/app/store/store";
-import EventForm from "@/app/components/EventForm";
-import {CreateEventType} from "@/app/types/eventType";
+import {fetchEventById, editEvent} from "@/store/slice/eventSlice";
+import {RootState, AppDispatch} from "@/store/store";
+import EventForm from "@/components/EventForm";
+import {CreateEventType} from "@/api/types/eventType";
 
 export default function EditEventPage() {
     const {id} = useParams<{ id: string }>();

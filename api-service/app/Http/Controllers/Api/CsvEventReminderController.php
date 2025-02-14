@@ -4,10 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ImportEventReminderRequest;
+use App\Jobs\SendEventReminderJob;
+use App\Mail\EventReminderMail;
+use App\Models\EventReminder;
 use App\Services\CsvEventReminderService;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use League\Csv\Reader;
 use OpenApi\Annotations as OA;
@@ -118,6 +123,32 @@ class CsvEventReminderController extends Controller
                 'success' => false,
                 'message' => 'Error processing CSV file',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function testReminder()
+    {
+        try {
+            // Find the event
+            $event = EventReminder::findOrFail(1);
+
+            SendEventReminderJob::dispatch($event);
+            Log::info("Dispatching reminder email job for event ID: " . $event->reminder_email);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Reminder email job dispatched successfully for"
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "Event with ID not found."
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => "Error dispatching job: " . $e->getMessage()
+            ], 500);
         }
     }
 }

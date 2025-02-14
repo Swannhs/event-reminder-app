@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  backend:
+    image: swann007/event_reminder_api:latest
+    container_name: laravel_api
+    restart: always
+    network_mode: host
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=base64:kTt7/szE0VE5iudD7zZ6/LlsSDACTeF3/aTlefh8XXw=
+      - DB_CONNECTION=mysql
+      - DB_HOST=127.0.0.1
+      - DB_PORT=3306
+      - DB_DATABASE=event_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+      - MAIL_MAILER=smtp
+      - MAIL_HOST=smtp.mailtrap.io
+      - MAIL_PORT=2525
+      - MAIL_USERNAME=your_username
+      - MAIL_PASSWORD=your_password
+      - MAIL_ENCRYPTION=tls
+      - MAIL_FROM_ADDRESS=noreply@example.com
+      - MAIL_FROM_NAME="Event Reminder App"
+    depends_on:
+      - db
+
+  frontend:
+    image: swann007/event_reminder_ui:latest
+    container_name: nextjs_ui
+    restart: always
+    network_mode: host
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    network_mode: host
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=event_db
