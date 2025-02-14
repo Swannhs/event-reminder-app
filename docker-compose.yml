@@ -5,7 +5,7 @@ services:
     build:
       context: ./api-service
       dockerfile: Dockerfile
-    container_name: laravel_app
+    container_name: event_reminder_api
     network_mode: host
     volumes:
       - ./api-service:/app
@@ -22,7 +22,7 @@ services:
     build:
       context: ./ui-service
       dockerfile: Dockerfile
-    container_name: nextjs_app
+    container_name: event_reminder_ui
     network_mode: host
     environment:
       - NEXT_PUBLIC_API_URL=http://localhost:8000/api

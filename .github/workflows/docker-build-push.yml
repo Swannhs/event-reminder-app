@@ -28,7 +28,7 @@ jobs:
           context: ./api-service
           file: ./api-service/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/laravel_app:latest,${{ secrets.DOCKER_HUB_USERNAME }}/laravel_app:${{ github.sha }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/event_reminder_api:latest,${{ secrets.DOCKER_HUB_USERNAME }}/event_reminder_api:${{ github.sha }}
 
       - name: Build and Push Frontend (Next.js)
         uses: docker/build-push-action@v5
@@ -36,11 +36,4 @@ jobs:
           context: ./ui-service
           file: ./ui-service/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nextjs_app:latest,${{ secrets.DOCKER_HUB_USERNAME }}/nextjs_app:${{ github.sha }}
-
-      - name: Build and Push MySQL (Optional)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./docker-compose.yml
-          push: false
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/event_reminder_ui:latest,${{ secrets.DOCKER_HUB_USERNAME }}/event_reminder_ui:${{ github.sha }}
