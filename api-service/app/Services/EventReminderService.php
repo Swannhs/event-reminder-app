@@ -9,7 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class EventReminderService
 {
-    public function getAllEvents(int $perPage = 10): LengthAwarePaginator
+    public function getAllEvents(int $perPage = 9): LengthAwarePaginator
     {
         return EventReminder::paginate($perPage);
     }

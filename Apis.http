@@ -1,0 +1,4 @@
+### GET request to example server
+GET http://backend:8000/api/event-reminders
+
+###
