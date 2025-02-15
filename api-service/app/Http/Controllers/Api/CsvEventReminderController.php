@@ -125,30 +125,4 @@ class CsvEventReminderController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
-
-    public function testReminder()
-    {
-        try {
-            // Find the event
-            $event = EventReminder::findOrFail(1);
-
-            SendEventReminderJob::dispatch($event);
-            Log::info("Dispatching reminder email job for event ID: " . $event->reminder_email);
-
-            return response()->json([
-                'success' => true,
-                'message' => "Reminder email job dispatched successfully for"
-            ], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => "Event with ID not found."
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => "Error dispatching job: " . $e->getMessage()
-            ], 500);
-        }
-    }
 }

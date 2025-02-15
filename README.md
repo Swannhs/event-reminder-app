@@ -99,7 +99,11 @@ docker exec -it event_reminder_api php artisan queue:work --tries=3 --timeout=90
 ### **Step 4: Open App**
 - **API Swagger:** `http://localhost:8000/api/documentation`
 - **Frontend:** `http://localhost:3000`
-
+- **Test CRUD Operations**
+- ```sh
+  # Run API Tests
+  docker exec -it event_reminder_api php artisan test
+  ```
 ---
 
 ## **📧 Email Reminders - Debugging**
