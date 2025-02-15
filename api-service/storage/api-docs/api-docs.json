@@ -1,0 +1,533 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Event Reminder API",
+        "description": "API documentation for managing event reminders",
+        "contact": {
+            "email": "support@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/event-reminders/import": {
+            "post": {
+                "tags": [
+                    "Event Reminders"
+                ],
+                "summary": "Import event reminders from a CSV file",
+                "description": "Uploads a CSV file and processes event reminders in bulk",
+                "operationId": "importEventReminders",
+                "requestBody": {
+                    "description": "CSV file upload",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "csv_file": {
+                                        "description": "The CSV file to upload",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "CSV imported successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "CSV imported successfully"
+                                        },
+                                        "imported_count": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "example": []
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid CSV format",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Invalid CSV format"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/event-reminders": {
+            "get": {
+                "tags": [
+                    "Event Reminders"
+                ],
+                "summary": "Get all event reminders with pagination",
+                "operationId": "getEventReminders",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page number for pagination",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Number of items per page (default: 10)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval of paginated event reminders",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/EventReminder"
+                                            }
+                                        },
+                                        "links": {
+                                            "properties": {
+                                                "first": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/event-reminders?page=1"
+                                                },
+                                                "last": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/event-reminders?page=5"
+                                                },
+                                                "prev": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/event-reminders?page=1",
+                                                    "nullable": true
+                                                },
+                                                "next": {
+                                                    "type": "string",
+                                                    "example": "http://localhost/api/event-reminders?page=3",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "properties": {
+                                                "current_page": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "from": {
+                                                    "type": "integer",
+                                                    "example": 11
+                                                },
+                                                "last_page": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "per_page": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "to": {
+                                                    "type": "integer",
+                                                    "example": 20
+                                                },
+                                                "total": {
+                                                    "type": "integer",
+                                                    "example": 50
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Event Reminders"
+                ],
+                "summary": "Create a new event reminder",
+                "operationId": "createEventReminder",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EventReminderRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Event created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Event reminder created successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/EventReminder"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/event-reminders/{id}": {
+            "get": {
+                "tags": [
+                    "Event Reminders"
+                ],
+                "summary": "Get an event reminder by ID",
+                "operationId": "getEventReminderById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful retrieval of event reminder",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Event reminder retrieved successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/EventReminder"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Event Reminders"
+                ],
+                "summary": "Update an existing event reminder",
+                "operationId": "updateEventReminder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EventReminderUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Event updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Event reminder updated successfully"
+                                        },
+                                        "data": {
+                                            "$ref": "#/components/schemas/EventReminder"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Event Reminders"
+                ],
+                "summary": "Delete an event reminder",
+                "operationId": "deleteEventReminder",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Event deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Event reminder deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "EventReminderImportRequest": {
+                "title": "Event Reminder CSV Import Request",
+                "description": "Request body for importing event reminders via CSV",
+                "properties": {
+                    "csv_file": {
+                        "description": "CSV file to upload",
+                        "type": "string",
+                        "format": "binary"
+                    }
+                },
+                "type": "object"
+            },
+            "EventReminderRequest": {
+                "title": "Event Reminder Request",
+                "description": "Request body for creating an event reminder",
+                "required": [
+                    "title",
+                    "date_time",
+                    "status"
+                ],
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "example": "Project Meeting"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Discuss project requirements",
+                        "nullable": true
+                    },
+                    "date_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-02-20T10:00:00Z"
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "upcoming",
+                            "completed"
+                        ],
+                        "example": "upcoming"
+                    },
+                    "reminder_email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "user@example.com",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "EventReminderUpdateRequest": {
+                "title": "Event Reminder Update Request",
+                "description": "Request body for updating an event reminder",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "example": "Updated Project Meeting",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Updated project discussion",
+                        "nullable": true
+                    },
+                    "date_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-02-21T15:00:00Z",
+                        "nullable": true
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "upcoming",
+                            "completed"
+                        ],
+                        "example": "completed",
+                        "nullable": true
+                    },
+                    "reminder_email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "updated@example.com",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "EventReminder": {
+                "title": "Event Reminder Resource",
+                "description": "Event Reminder response data",
+                "required": [
+                    "id",
+                    "event_id",
+                    "title",
+                    "date_time",
+                    "status"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "event_id": {
+                        "type": "string",
+                        "example": "EVT-12345"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Project Meeting"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Discuss project requirements"
+                    },
+                    "date_time": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-02-20T10:00:00Z"
+                    },
+                    "status": {
+                        "type": "string",
+                        "example": "upcoming"
+                    },
+                    "reminder_email": {
+                        "type": "string",
+                        "example": "user@example.com"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-02-10T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2025-02-15T15:00:00Z"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Event Reminders",
+            "description": "API Endpoints for managing event reminders"
+        }
+    ]
+}
