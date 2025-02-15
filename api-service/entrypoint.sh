@@ -31,6 +31,10 @@ done
 
 echo "✅ Database is ready!"
 
+# Generate swagger documentation
+echo "🚀 Generating Swagger documentation..."
+php artisan l5-swagger:generate
+
 # Run migrations & seed the database
 echo "🚀 Running migrations..."
 php artisan migrate:fresh --seed
